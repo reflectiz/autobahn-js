@@ -1,19 +1,39 @@
 # AutobahnJS - Change Log
 
+## 20.2.2
+
+* new: update XBR contract ABI files to v20.2.2
+* fix: assert issue when running under different nodejs vm contexts (#490)
+
+## 20.2.1
+
+* new: update XBR contract ABI files to v20.2.1
+
+## 20.1.1
+
+* fix: upstream truffle dependency renaming - must use `@truffle/contract`
+* new: update XBR contract ABI files
+
+## v19.12.1
+
+* fix: docker image build scripts
+* new: streamline websocket selection (#479)
+
+## v19.10.1
+
+released 2019/10/02:
+
+* new: XBR data service encryption and transaction support
+
 ## v17.5.2
 
 * new: WAMP-cryptosign authentication support
-
----
 
 ## v0.9.1
  * compatibility with latest WAMP v2 spec ("RC-2, 2014/02/22")
 
 ## v0.9.0
  * complete new implementation with WAMP v2 only support
-
-
-----------
 
 ## v0.8.2
  * compatibility with Web workers

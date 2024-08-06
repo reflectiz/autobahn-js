@@ -16,7 +16,7 @@ and we will cover all four interactions involved in above patterns
 
 > **tip**
 >
-> If you are new to WAMP or want to learn more about the design principles behind WAMP, we have a longer text [here](http://wamp.ws/why/).
+> If you are new to WAMP or want to learn more about the design principles behind WAMP, we have a longer text [here](https://wamp-proto.org/why/index.html).
 
 ------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ Registering Procedures
 To make a procedure available for remote calling, the procedure needs to be *registered*. Registering a procedure is done by calling the `register` method on the `session` object:
 
 ``` js
-connection.onopen(session, details) {
+connection.onopen = function (session) {
    var add2 = function(args) {
       return args[0] + args[1];
    };
@@ -118,7 +118,7 @@ When the registration succeeds, authorized callers will immediately be able to c
 
 A registration may also fail, e.g. when a procedure is already registered under the given URI or when the session is not authorized to register procedures.
 
-Function registration needs to provide an **indentifier** which is used by the client when calling the function. For these WAMP uses **URIs**, (i.e. here `'com.myapp.add2'`), in Java packet notation. URIs are an established, easy way for namespace management.
+Function registration needs to provide an **identifier** which is used by the client when calling the function. For these WAMP uses **URIs**, (i.e. here `'com.myapp.add2'`), in Java packet notation. URIs are an established, easy way for namespace management.
 
 Calling Procedures
 ------------------
@@ -219,4 +219,4 @@ Where to go from here
 
 -   For more features of **Autobahn|JS** and details about RPC and PubSub, see the [Reference](reference.md).
 -   There's an overview of example code for specific WAMP features [Examples Overview](examples.md).
--   Read about [the idea behind WAMP.](http://wamp.ws/why/)
+-   Read about [the idea behind WAMP.](https://wamp-proto.org/why/index.html)

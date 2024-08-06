@@ -205,6 +205,17 @@ Options that control **WebSocket subprotocol handling**:
 -   `skip_subprotocol_check`: Not yet implemented.
 -   `skip_subprotocol_announce`: Not yet implemented.
 
+Options that control **WebSocket heartbeat on NodeJS**:
+
+> **note**
+>
+> Below options only work when the transport is `websocket` and the underlying platform is NodeJS/Electron.
+
+-   `autoping_interval`: Seconds between automatic pings
+-   `autoping_timeout`: Seconds until a ping is considered timed-out
+-   `autoping_size`: bytes of random data to send in ping messages (default: 4)
+
+
 Options that define **Custom error handlers:**
 -   `on_user_error`: *function* - This error handler is called in the following cases: 
     - an exception raised in `onopen`, `onclose`, `onchallenge` callbacks,
@@ -213,8 +224,9 @@ Options that define **Custom error handlers:**
       the error message is sent back to the Dealer.)
 -   `on_internal_error`: *function* - This error handler is called in the following cases:
     - not able to create a Wamp transport,
-    - when a protocol violation is occured,
+    - when a protocol violation is occurred,
     - when no `onchallenge` defined, but a challenge request is received due to authenticate the client,
+
 
 ```javascript
     var connection = new autobahn.Connection({
@@ -233,14 +245,80 @@ Options that define **Custom error handlers:**
 
 > **note**
 >
-> If no error handler is defined for these functions, an error level consol log will be written. 
+> If no error handler is defined for these functions, an error level console log will be written. 
 
 > **note**
 >
 > In a case of error handling in the Callee role, when the invocation handler is executed, the error
 > is reported on the Callee side (with the custom error handler or an error log), but despite that the
 > error is sent back to the Dealer, and the Caller will receive a `runtime.error` wamp message.
-  
+
+
+Options that control **tls connection**:
+-   `tlsConfiguration`: *object*
+    - `ca`: *Buffer | String* - CA
+    - `cert`: *Buffer | String* - Certificate Public Key
+    - `key`: *Buffer | String* - Certificate Private Key
+
+Options that define **authentication settings**
+- `authid`: *string* - If provided, this auth ID will be passed to the router when connecting. The router may issue a different challenge based on which auth ID is trying to connect.
+- `authextra`: *unknown* - If provided, this data is passed to the router during the connection, which the router may use to further customize the challenge to the client.
+- `authmethods`: *string[]* - An array of names of authentication methods supported by the client. The router *SHOULD* return challenge messages with methods only among those, or otherwise do what it would for unauthenticated connections (drop, continue anonymously, etc.).
+- `onchallenge`: *function(session: Session, method: string, extra: unknown?): string \| \[string, unknown\] | Promise<string \| \[string, unknown\]* - A handler for challenge messages from the router. Return value should be a response to the challenge message. Either a string ("signature"), or an array with the response as the first value, and "extra" data that the router may need to verify that response as a second value. A promise resolving to those types may also be returned. If the function throws or the returned promise rejects, the connection will be aborted. The function is given the following arguments:
+    - `session`: *Session* - The session being challenged.
+    - `method`: *string* - Name of the authentication method the router is expecting a response to.
+    - `extra`: *unknown?* - Extra data that the router may provide the client in order to complete the challenge successfully.
+
+Example:
+```javascript
+    var secret = 'top-secret-do-not-show-in-browser';
+    var connection = new autobahn.Connection({
+        authid: 'my-user',
+        authmethods: ['ticket', 'wampcra'],
+        onchallenge: function (session, method, extra) {
+            switch (method) {
+                case 'ticket':
+                    // This authentication method requires the client to provide a value that the router can verify,
+                    // even if it doesn't know the exact expected value in advance.
+                    
+                    // We'll use JWT as our value.
+                    
+                    /*
+                    // For NodeJS, if the client can be trusted with the JWT signing key anyway,
+                    // the token may be created at the client.
+                    // See https://github.com/panva/jose for the JWT lib used below
+                    return new jose.SignJWT({})
+                        .setProtectedHeader({ alg: 'ES256' })
+                        .setIssuedAt()
+                        .setIssuer('urn:example:issuer')
+                        .setAudience('urn:example:audience')
+                        .setExpirationTime('2h')
+                        .sign(secret);
+                     */
+                    
+                    // For browser facing javascript, and untrusted NodeJS clients,
+                    // the JWT should be generated on the server,
+                    // and the result should be passed to the client.
+                    // The browser should not be trusted with the JWT signing key, only the JWT itself. e.g.
+
+                    return fetch('/my-jwt-generator').then(function (response) {
+                        return response.text();
+                    });
+                case 'wampcra':
+                   // This authentication method is included in autobahn, and is supported by the crossbar router.
+                   // It requires a secret known by both router and client,
+                   // which makes it unsuitable for browser facing javascript.
+                   // Use it only when running in NodeJS or at least ensure the "secret" is short lived
+                   // and only shared with pre-authenticated users.
+                   return autobahn.auth_cra.sign(secret, extra.challenge);
+                default:
+                   throw new Error('Unknown auth method');
+           }
+        }
+        // ... other options
+    });
+
+```
   
 Connection Properties
 ---------------------
@@ -443,7 +521,7 @@ session.resolve('api:add2');
 Session Meta-Events & Procedures
 --------------------------------
 
-Some WAMP routers (such as [Crossbar.io](http://crossbar.io)) provide the possibility to subscribe to events which are created by the router based on session lifecycle, as well as procedures which allow the retrieval of information about current sessions. For more information see the [Crossbar.io documenation](http://crossbar.io/docs/Session-Metaevents-and-Procedures/).
+Some WAMP routers (such as [Crossbar.io](http://crossbar.io)) provide the possibility to subscribe to events which are created by the router based on session lifecycle, as well as procedures which allow the retrieval of information about current sessions. For more information see the [Crossbar.io documentation](http://crossbar.io/docs/Session-Metaevents-and-Procedures/).
 
 Subscribe
 =========
@@ -454,7 +532,7 @@ To subscribe to a topic on a `session`:
 
 where
 
-* `topic` is the URI of the topic to susbscribe to
+* `topic` is the URI of the topic to subscribe to
 * `handler` is the event handler which should consume events
 * `options` - options object (see below)
 
@@ -543,7 +621,7 @@ You can unsubscribe a previously established `subscription`
 
     Session.unsubscribe(subscription)
 
-where `subscription` is an instance of `autobahn.Subscrioption` and which returns a *promise* that resolves to a boolean when successful or rejects with an instance of `autobahn.Error` when unsuccessful.
+where `subscription` is an instance of `autobahn.Subscription` and which returns a *promise* that resolves to a boolean when successful or rejects with an instance of `autobahn.Error` when unsuccessful.
 
 > **note**
 >
@@ -579,7 +657,7 @@ Complete Examples:
 Subscription Meta-Events and Procedures
 ---------------------------------------
 
-Some WAMP routers (such as [Crossbar.io](http://crossbar.io)) provide the possibility to subscribe to events which are created by the router based on subscription lifecycle, as well as procedures which allow the retrieval of information about current subscriptions. For more information see the [Crossbar.io documenation](http://crossbar.io/docs/Subscription-Meta-Events-and-Procedures/).
+Some WAMP routers (such as [Crossbar.io](http://crossbar.io)) provide the possibility to subscribe to events which are created by the router based on subscription lifecycle, as well as procedures which allow the retrieval of information about current subscriptions. For more information see the [Crossbar.io documentation](http://crossbar.io/docs/Subscription-Meta-Events-and-Procedures/).
 
 Publish
 =======
@@ -590,7 +668,7 @@ To publish an event on a `session`:
 
 where
 
-* `topic`is the URI of the topic to publish to
+* `topic` is the URI of the topic to publish to
 * `args` is an *optional* array as application event payload
 * `kwargs` is an *optional* object as application event payload
 * `options` is an *optional* object which specifies options for publication (see below)
@@ -719,7 +797,7 @@ session.register('com.myapp.proc1', myproc1).then(
       // registration succeeded, registration is an instance of autobahn.Registration
    },
    function (error) {
-      // registration failed, error is an isntance of autobahn.Error
+      // registration failed, error is an instance of autobahn.Error
    }
 );
 ```
@@ -775,7 +853,7 @@ It is possible to have shared registrations, i.e. more than one registration for
 
 -   `first` - first registration in the list is invoked
 -   `last` - last registration in the list is invoked
--   `roundrobing` - the registration following the last invoked registration on the list is invoked
+-   `roundrobin` - the registration following the last invoked registration on the list is invoked
 -   `random` - a random registration from the list is invoked
 
 The invocation policy for an URI is determined by the first registration for that URI, and only subsequent registration attemps which set the same invocation rule may be successful. For example, with a first registration of

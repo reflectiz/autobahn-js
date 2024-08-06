@@ -5,6 +5,20 @@ WAMP for Browsers and NodeJS.
 [![NPM](https://nodei.co/npm/autobahn.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/autobahn/)
 
 [![Docker Hub](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/crossbario/autobahn-js/)
+[![Build Status](https://travis-ci.org/crossbario/autobahn-js.svg?branch=master)](https://travis-ci.org/crossbario/autobahn-js)
+
+**npm quicklinks:**
+
+* [**autobahn**](https://www.npmjs.com/package/autobahn/) - Autobahn for NodeJS
+* [**autobahn-browser**](https://www.npmjs.com/package/autobahn-browser/) - Autobahn for browsers
+* [**autobahn-xbr**](https://www.npmjs.com/package/autobahn-xbr/) - Autobahn-[XBR](https://xbr.network/) for NodeJS
+* [**autobahn-xbr-browser**](https://www.npmjs.com/package/autobahn-xbr-browser/) - Autobahn-[XBR](https://xbr.network/) for browsers
+
+**XBR quicklinks:**
+
+* [XBR Network](https://xbr.network/) - The XBR Network homepage.
+* [XBR Protocol](https://github.com/crossbario/xbr-protocol) - The XBR Protocol source repository.
+* [XBR Docs](https://xbr.network/docs/protocol/index.html) - XBR Protocol and APIs Documentation.
 
 ---
 
@@ -91,9 +105,9 @@ Features
 
 ### Browser Development
 
-The *latest* built release of AutobahnJS can be retrieved by cloning [this](https://github.com/crossbario/autobahn-js-built) repository. You can then host the library wherever you need to.
+The *latest* built release of AutobahnJS can be retrieved by cloning [this](https://github.com/crossbario/autobahn-js-browser) repository. You can then host the library wherever you need to.
 
-This also contains a complete history of previous releases and can be used with **[Bower](http://bower.io/)** to:
+This also contains a complete history of previous releases and can be used with **[Bower](http://bower.io/)**. To install:
 
 	bower install autobahn
 
@@ -189,7 +203,7 @@ For more information, take a look at the [project documentation](/doc/README.md)
 
 ## Get in touch
 
-Get in touch on IRC `#autobahn` on `chat.freenode.net` or the [mailing list](http://groups.google.com/group/autobahnws).
+Get in touch on our [user forum](https://crossbar.discourse.group/).
 
 
 ## Acknowledgements
